@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎬 YT Summarizer
 
-## Getting Started
+AI-powered YouTube video summarizer and knowledge manager.
+**Turn hours of video content into structured, high-quality learning materials.**
 
-First, run the development server:
+## ✨ Features
 
+-   **🤖 Deep AI Summaries**: Uses **Gemini 2.0 Flash** to generate multi-pass, structured summaries.
+-   **📚 Knowledge Management**: Automatically organizes summaries by channel and playlist.
+-   **📝 Markdown Export**: Export your summaries to Markdown for notes apps like Obsidian.
+-   **🐳 Docker Support**: Run the entire stack with a single command.
+-   **⚡ High Performance**: Caches transcripts and summaries for instant access.
+-   **🔍 Smart Search**: (Planned) Search through your entire video knowledge base.
+-   **🎯 Playlist Management**: Easily import and organize your YouTube playlists.
+
+## 🛠️ Tech Stack
+
+-   **Frontend**: [Next.js 15](https://nextjs.org/) (App Router), [Tailwind CSS](https://tailwindcss.com/), [shadcn/ui](https://ui.shadcn.com/)
+-   **Auth**: [NextAuth.js v5](https://authjs.dev/) (Google OAuth)
+-   **AI**: [Google Gemini 2.0 Flash](https://deepmind.google/technologies/gemini/)
+-   **Database**: SQLite with [Prisma](https://www.prisma.io/)
+-   **Transcripts**: `youtube-transcript-plus` (Node.js)
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+-   **Node.js** (v18 or higher)
+-   **Docker** (Optional, for containerized deployment)
+-   **Google Cloud Console Account** (for OAuth credentials)
+-   **Google AI Studio Key** (for Gemini API)
+
+### Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/yourusername/yt-summarizer.git
+    cd yt-summarizer
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+3.  **Configure Environment Variables:**
+    Copy the example `.env` file and fill in your keys.
+    ```bash
+    cp .env.example .env.local
+    ```
+    
+    Edit `.env.local` with your values:
+    -   `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET`: From Google Cloud Console.
+    -   `GOOGLE_AI_KEY`: Your Gemini API key.
+    -   `NEXTAUTH_SECRET`: Generate one with `openssl rand -base64 32`.
+
+4.  **Database Setup:**
+    Initialize the SQLite database.
+    ```bash
+    npx prisma generate
+    npx prisma db push
+    ```
+
+### 🏃‍♂️ Running the App
+
+#### Option 1: Development Mode (Manual)
+Start the Next.js development server.
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+
+#### Option 2: Docker (Recommended for Production)
+Build and run the container.
+```bash
+docker build -t yt-summarizer .
+docker run -p 3000:3000 -v $(pwd)/data:/app/data yt-summarizer
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📖 Usage
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1.  **Sign In**: Log in with your Google account.
+2.  **Add Videos**: Paste a YouTube video URL or playlist link.
+3.  **Summarize**: Click the "Summarize" button. The AI will process the video in multiple passes (Structure -> Deep Summary -> Optimization).
+4.  **View & Export**: Read the structured summary directly in the app or click "Export" to save it as a Markdown file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📂 Project Structure
 
-## Learn More
+-   `/src/app`: Next.js App Router pages and API routes.
+-   `/src/components`: UI components (shadcn/ui).
+-   `/src/lib`: Utility functions, AI logic (`/ai`), and database clients.
+-   `/prisma`: Database schema and migrations.
+-   `/public`: Static assets.
 
-To learn more about Next.js, take a look at the following resources:
+## 🤝 Contributing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📄 License
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is open-source and available under the [MIT License](LICENSE).

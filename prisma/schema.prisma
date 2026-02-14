@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  videos        Video[]
+  tags          Tag[]
+  settings      UserSettings?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model UserSettings {
+  id          String  @id @default(cuid())
+  userId      String  @unique
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  aiProvider  String  @default("gemini")          // gemini | openai | openai-compatible
+  aiModel     String  @default("gemini-2.0-flash")
+  apiKey      String?                              // stored per user
+  baseUrl     String?                              // for openai-compatible endpoints
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Video {
+  id            String    @id @default(cuid())
+  youtubeId     String
+  title         String
+  description   String?
+  thumbnail     String?
+  channelName   String?
+  channelId     String?
+  duration      String?
+  publishedAt   DateTime?
+  playlistId    String?
+  transcriptData String?   // cached JSON of TranscriptResult (segments + language)
+  
+  // App state
+  isRead        Boolean   @default(false)
+  isRemoved     Boolean   @default(false)
+  addedAt       DateTime  @default(now())
+  readAt        DateTime?
+  
+  // Relations
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  summaries     Summary[]
+  chatMessages  ChatMessage[]
+  videoTags     VideoTag[]
+  
+  @@unique([youtubeId, userId])
+}
+
+model Summary {
+  id              String    @id @default(cuid())
+  videoId         String
+  video           Video     @relation(fields: [videoId], references: [id])
+  
+  status          String    @default("pending") // pending | processing | completed | failed
+  markdown        String?   @default("")
+  transcript      String?
+  structuralAnalysis String?
+  provider        String?   // gemini | openai | openai-compatible
+  providerModel   String?   // e.g. gemini-2.0-flash, gpt-4o
+  model           String?   // legacy, kept for backward compat
+  passesCompleted Int       @default(0)
+  category        String?
+  targetLanguage  String    @default("en") // en | tr
+  translations    String?   // JSON { "tr": "...", "es": "..." }
+  metadata        String?   // JSON
+  
+  // Token Usage
+  inputTokens     Int       @default(0)
+  outputTokens    Int       @default(0)
+  totalTokens     Int       @default(0)
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  errorMessage    String?
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  videoId   String
+  video     Video    @relation(fields: [videoId], references: [id])
+  role      String   // user | assistant
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model Tag {
+  id        String     @id @default(cuid())
+  name      String
+  color     String?
+  userId    String
+  user      User       @relation(fields: [userId], references: [id])
+  videoTags VideoTag[]
+  
+  @@unique([name, userId])
+}
+
+model VideoTag {
+  videoId String
+  tagId   String
+  video   Video  @relation(fields: [videoId], references: [id])
+  tag     Tag    @relation(fields: [tagId], references: [id])
+  
+  @@id([videoId, tagId])
+}
