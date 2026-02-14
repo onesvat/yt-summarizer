@@ -1,0 +1,16 @@
+services:
+  app:
+    build: .
+    container_name: yt-summarizer
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      # Override database URL to use the mounted volume
+      - DATABASE_URL=file:/app/data/dev.db
+      - NODE_ENV=production
+    env_file:
+      - .env
+    volumes:
+      # Persistent data (database + markdown exports)
+      - ./data:/app/data
