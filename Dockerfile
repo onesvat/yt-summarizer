@@ -42,7 +42,7 @@ RUN \
 FROM base AS runner
 WORKDIR /app
 
-RUN apk add --no-cache openssl
+RUN apk add --no-cache openssl su-exec
 
 ENV NODE_ENV=production
 # Uncomment the following line in case you want to disable telemetry during runtime.
@@ -74,13 +74,11 @@ COPY --from=builder /app/docker-entrypoint.sh ./docker-entrypoint.sh
 # Create data directory for exports and give permissions
 RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
 
-USER nextjs
-
 EXPOSE 3000
 
 ENV PORT=3000
 # set hostname to localhost
 ENV HOSTNAME="0.0.0.0"
 
-# Run prisma db push on startup to ensure tables exist, then start the app
+# Entrypoint fixes volume permissions, runs prisma db push, then drops to nextjs user
 CMD ["sh", "docker-entrypoint.sh"]
